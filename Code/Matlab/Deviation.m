@@ -1,5 +1,8 @@
+% Summary
+%{
+Write summary here
+%}
 %% Load all averaged data and find the Frechet Discrete and Hausdroff distance between the baseline and the other curves
-
 % Delete the empty rows
 C_Avg_Ad(all(cellfun('isempty',C_Avg_Ad),2),:) = [];
 C_Avg_Rr(all(cellfun('isempty',C_Avg_Rr),2),:) = [];
@@ -11,29 +14,38 @@ C_strRr(all(cellfun('isempty',C_strRr),2),:) = [];
 n =  m-2; % Maximum number of files to process in any folder
 n = n(n>0); % Remove the empty folders
 
-[C_Fr_dt,C_Hd_dt] = deal(cell(1, s1)); % Hd_dt = Frechet Discrete,  Fr_dt = Hausdroff distance
+[C_Ft_Ad,C_Ft_Rr] = deal(cell(1, s1)); % Ft = Frechet Discrete
 
 for i3 = 1:s1
     
-    [Fr_dt, Hd_dt,aa] = deal (zeros());
+    [Ft_Ad,Ft_Rr, aa] = deal (zeros());
     
     for i4 = 1:n(i3)
         A = C_Avg_Ad {i3,1};% 1 is the baseline measurement
         B = C_Avg_Ad {i3, i4};
-        Fr_dt (i4) = DiscreteFrechetDist(A,B);
-        Hd_dt (i4) = Hausdorff(A, B);
+        C = C_Avg_Rr {i3,1};% 1 is the baseline measurement
+        D = C_Avg_Rr {i3, i4};
+        Ft_Ad (i4) = DiscreteFrechetDist(A,B);
+%         Ft_Rr (i4) = DiscreteFrechetDist(C,D);
         %         aa (i4) = C_strAd {i3, i4};
     end
     
-    C_Fr_dt {i3} = Fr_dt;
-    C_Hd_dt {i3} = Hd_dt;
+    C_Ft_Ad {i3} = Ft_Ad;
+%     C_Ft_Rr {i3} = Ft_Rr;
     
     %     cc {i3} = aa; % or use directly form cell array
     hold off
     figure()
-    bar(Fr_dt)
-    figure()
-    bar(Hd_dt)
+    b1= bar(Ft_Ad);
+    %     set(b1, {'DisplayName'}, {}')
+    %     legend()
+    title('Ft-Ad')
+    
+%     figure()
+%     b2 =bar(Ft_Rr);
+%     %     set(b2, {'DisplayName'}, {'Jan','Feb','Mar'}')
+%     %     legend()
+%     title('Ft-Rr')
     
 end
 
