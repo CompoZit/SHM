@@ -1,8 +1,11 @@
 %% Author: Tasdeeq Sofi, Project: ENHNANCE H2020
-% Date: 07/05/21
-% Code written for analyzing the tests carried out with C60 to repeat the tests carried over the specimen for UPM
-% Capacitance, Impedance, admittance  and other values measuremnsts are carried out for DuraAct sensors secondary bonded to PEEK panels
-% Instructions: Select the folder containing the capacitance, impedance and the guide wave measurements in seprate folders "e.g., 01_TestData located at UPM_22-03-21_CP-IP-GW"
+%{ 
+Date: 07/05/21
+Code written for analyzing the test data carried out with C60
+Measurememts: Capacitance, Impedance, admittance  and other values for DuraAct sensors secondary bonded to PEEK panels
+Instructions: Select the folder containing the measurements (01_TestFolder) from C60 analysis e.g., 01_TestFolder located at...
+... C:\Users\tsofi\OneDrive\01_ENHAnCE\07_ExperimentalData\01_Tests\02_C60_Sim_Defects,similarly for every test folder 
+%}
 
 %% Prepare workspace and Define parameters if any
 clr;
@@ -27,9 +30,9 @@ for i=1:length (folders)
 end
 
 %% Load text files, process them, plot and store the results
-C_Avg_Ad = cell(nb_folders, (max(m)-2));
-C_Avg_Rr = cell(nb_folders, (max(m)-2));
-for i1 = 3:length(folders)% because of '.' and '..'
+[C_Avg_Ad, C_Avg_Rr,C_strAd,C_strRr] = deal(cell(nb_folders, (max(m)-2)));
+
+for i1 = 3:length(folders)% 3 because of '.' and '..'
    
     if (folders(i1).isdir) % Check if it is a folder/directorty
         if ( ~strcmp(folders(i1).name,'.') && ~strcmp(folders(i1).name,'..'))% because of '.' and '..'
@@ -38,12 +41,12 @@ for i1 = 3:length(folders)% because of '.' and '..'
             folderpath = fullfile(pathstr,folder_name);
             files = dir(folderpath);
             
-            for i2 = 3:length(files) % because of '.' and '..'
+            for i2 = 3:length(files) % 3 because of '.' and '..'
                 file_name = files(i2).name;
                 filename = fullfile(folderpath, file_name);
                 [folderpath,name,ext] = fileparts(filename);
                 
-                [Fr, imp ,Avg_Ad ,Avg_Rr] = Avg_val(filename);% Function Avg_val calculates the average of Ad and Zr for each measuremmet
+                [Testdata, data, Fr, Avg_Ad ,Avg_Rr] = Avg_val(filename);% Function Avg_val calculates the average of Ad and Zr for each measuremmet
                 C_Avg_Ad {(i1-2),(i2-2)}=Avg_Ad;
                 C_Avg_Rr {(i1-2),(i2-2)}=Avg_Rr;
                 
@@ -58,6 +61,9 @@ for i1 = 3:length(folders)% because of '.' and '..'
                 filename=filename(1:(end-4));
                 strAd = strcat(foldername,'_',filename,'_','AvgAd');
                 strRr = strcat(foldername,'_',filename,'_','AvgRr');
+                
+                C_strAd {(i1-2),(i2-2)}=strAd;
+                C_strRr {(i1-2),(i2-2)}=strRr;
                 
                 p = mfilename('fullpath');
                 p = fileparts([p,mfilename]);
@@ -86,13 +92,15 @@ for i1 = 3:length(folders)% because of '.' and '..'
                 legend show
                 
                 figure ((2*i1)-4);
-                plot (Fr,Avg_Rr,'DisplayName',txt,'LineWidth',1)
+%                 plot (Fr,Avg_Rr,'DisplayName',txt,'LineWidth',1)
+%                 hold on
+%                 xlabel ('Frequency [Hz]','FontSize', 20)
+%                 ylabel ('Resistance [Ohm]','FontSize', 20)
+%                 title (erase(sav_folder2,"_"))
+%                 legend show
+                [R,m,c,Pev]=Leastsq_Regression(Fr,Avg_Ad);
+                title (erase(sav_folder1,"_"))
                 hold on
-                xlabel ('Frequency [Hz]','FontSize', 20)
-                ylabel ('Resistance [Ohm]','FontSize', 20)
-                title (erase(sav_folder2,"_"))
-                legend show
-
                 
             end
         end
@@ -100,4 +108,7 @@ for i1 = 3:length(folders)% because of '.' and '..'
 
    
 end
+
+%% Deviation
+% Deviation
 
