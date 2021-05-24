@@ -14,7 +14,5 @@ Pev = polyval(p,x);
 R=corrcoef(x,y);
 R=R(1,2);
 
-% hold on
-plot(x,Pev) ; 
 
 end
