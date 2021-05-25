@@ -51,6 +51,7 @@ for i1 = 3:length(folders)% 3 because of '.' and '..'
                 C_Avg_Ad {(i1-2),(i2-2)}=Avg_Ad;
                 C_Avg_Rr {(i1-2),(i2-2)}=Avg_Rr;
                 [R,m,c,Pev]=Leastsq_Regression(Fr,Avg_Ad);
+%                 pks = findpeaks(Avg_Ad);
                 
                 % Normalize
 %                 Avg_Ad = (Avg_Ad-min(Avg_Ad))/(max(Avg_Ad)-min(Avg_Ad));
@@ -88,15 +89,15 @@ for i1 = 3:length(folders)% 3 because of '.' and '..'
                 figure ((i1-2))
                 subplot(2,1,1);
                 txt = (erase(filename,"_"));
-                Fr = smooth(Fr);
-                Avg_Ad=smooth(Avg_Ad);
+%                 Fr = smooth(Fr);
+%                 Avg_Ad=smooth(Avg_Ad);
                 loglog(Fr,Avg_Ad,'DisplayName',txt,'LineWidth',1)
                 [~] = Plot_prop(sav_folder1,Fr,'Admittance [S]');
                 
 %                 figure ((2*i1-4))
                 subplot(2,1,2);
-                Fr = smooth(Fr);
-                Avg_Rr=smooth(Avg_Rr);
+%                 Fr = smooth(Fr);
+%                 Avg_Rr=smooth(Avg_Rr);
                 plot(Fr,Avg_Rr,'DisplayName',txt,'LineWidth',1)
                 [~] = Plot_prop(sav_folder2,Fr,'Resistance [Ohm]');
                 

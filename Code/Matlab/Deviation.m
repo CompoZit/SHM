@@ -34,16 +34,11 @@ for i3 = 1:s1
     lgd = erase(lgd,'_');
     lgd = erase(lgd,(strcat(SpltStr{1,1:2})));
     
-    % Uncomment for stroing and plotting devaition of slope for each line w.r.t to reference
+    % Stroing and plotting devaition of slope for each line w.r.t to reference
     %{
     m_array1 = C_m(i3,:);
     m_array = cell2mat(m_array1);
     figure()
-    m_array=smooth(m_array);
-    plot(m_array)
-    hold on
-    plot(m_array,'o');
-    hold on
     width =0.2;
     b1=bar(m_array,width);
     title(strcat(SpltStr{1,1:2}))
@@ -52,13 +47,14 @@ for i3 = 1:s1
     xtickangle(45)
     %}
     
+    % Stroing and plotting devaition of Admittance and Resistance for each data measurement w.r.t to reference (Baseline)
     for i4 = 1:n(i3)
         A = C_Avg_Ad {i3,1};% 1 is the baseline measurement
         B = C_Avg_Ad {i3, i4};
         C = C_Avg_Rr {i3,1};
         D = C_Avg_Rr {i3, i4};
-        Ft_Ad (i4) = DiscreteFrechetDist(A,B); % Frechet Distance for Admittance plots
-        Ft_Rr (i4) = DiscreteFrechetDist(C,D); % Frechet Distance for Resistance plots
+        Ft_Ad (i4) = FrechetDiscrete(A,B); % Frechet Distance for Admittance plots
+        Ft_Rr (i4) = FrechetDiscrete(C,D); % Frechet Distance for Resistance plots
     end
     
     C_Ft_Ad {i4} = Ft_Ad;
@@ -66,12 +62,7 @@ for i3 = 1:s1
     
     % Difference between Admittance plots
     figure()
-    Ft_Ad=smooth(Ft_Ad);
-    plot(Ft_Ad)
-    hold on
-    plot(Ft_Ad,'+');
-    hold on
-    width =0.2;
+    width =0.4;
     b2=bar(Ft_Ad,width);
     title(strcat(SpltStr{1,1:2}))
     set(gca,'XTickLabels',lgd)
@@ -80,14 +71,8 @@ for i3 = 1:s1
 
 %     
     % Difference between Resistance plots
-%     {
+    %{
     figure()
-    Ft_Rr=smooth(Ft_Rr);
-    plot(Ft_Rr)
-    hold on
-    plot(Ft_Rr,'+');
-    hold on
-    width =0.2;
     b3=bar(Ft_Rr,width);
     title(strcat(SpltStr{1,1:2}))
     set(gca,'XTickLabels',lgd)

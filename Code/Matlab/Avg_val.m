@@ -15,11 +15,12 @@ fclose(fid);
 % Find the number of data points in a single measurement
 data1= data{1,1}; % contains the test  and the frequency data
 Testdata = data1(2:7);
-datapts = data1(4,1);
-datapts = cell2mat (datapts);
-datapts= datapts(16:end); % Obtain the number of data points 
-datapts= str2double(datapts)+8; % Initial 8 line contain the test data, automate this 8 as well by finding the loaction of the header lines
-k= round(length(data1)/300); % automate 300 the number of test points
+datapts = char(data1(4,1));
+ind = find(contains(data1,datapts));
+d = ind(2)-ind(1); % Common difference
+datapts = str2double(datapts(end-3:end));% Obtain the number of data points   
+k= round(length(data1)/(datapts)); % Initial 8 line contain the test data, automate this 8 as well by finding the loaction of the header lines
+datapts = datapts+8;
 
 %% Laod all the test data
 % Capcitance
@@ -34,11 +35,11 @@ C_Rr = cell(1,k);
 
 % Loop for each repeated measurements load the values using a loop   
     for j=1:k % number of total data sets
-        Ad_new = Ad((305*j-296):(j*datapts-(j-1)*3)); % Automate 305*j-296
+        Ad_new = Ad((9+(j-1)*d):(j*datapts-(j-1)*3));% Arthmearic progression 
         Ad_new = str2double(Ad_new);
         C_Ad{j} =Ad_new;
         
-        Rr_new = Rr((305*j-296):(j*datapts-(j-1)*3));
+        Rr_new = Rr((9+(j-1)*d):(j*datapts-(j-1)*3));
         Rr_new = str2double(Rr_new);
         C_Rr{j} = Rr_new; 
     end
