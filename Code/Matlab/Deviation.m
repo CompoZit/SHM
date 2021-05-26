@@ -10,17 +10,18 @@
 % Delete the empty rows from the Admittance, the Resistace and nanme string data
 C_Avg_Ad(all(cellfun('isempty',C_Avg_Ad),2),:) = [];
 C_Avg_Rr(all(cellfun('isempty',C_Avg_Rr),2),:) = [];
+C_strAd(all(cellfun('isempty',C_strAd),2),:) = [];
+C_strRr(all(cellfun('isempty',C_strRr),2),:) = [];
 
 % Find size and number of files to process in each cell row
 [s1, s2]=size(C_Avg_Ad);
 n =  f-2; % Maximum number of files to process in any folder
 n = n(n>0); % Remove the empty folders
 
-% Obtain and plot the slopes of the linear fit curves to the admittance measurements 
+% Delete the empty rows from the slope data, peaks data and the corresponding frequency at the peaks
 C_m(all(cellfun('isempty',C_m),2),:) = [];
-C_strAd(all(cellfun('isempty',C_strAd),2),:) = [];
-C_strRr(all(cellfun('isempty',C_strRr),2),:) = [];
-
+C_max_pks(all(cellfun('isempty',C_max_pks),2),:) = [];
+C_Fr_pks(all(cellfun('isempty',C_Fr_pks),2),:) = [];
 
 % Obtain and plot the Ft = Frechet Distance for each admittance and resitance measurement w.r.t to baseline data/reference data. 
 [C_Ft_Ad,C_Ft_Rr] = deal(cell(1, s1)); % Ft = Frechet Discrete
@@ -34,22 +35,9 @@ for i3 = 1:s1
     lgd = erase(lgd,'_');
     lgd = erase(lgd,(strcat(SpltStr{1,1:2})));
     
-    % Stroing and plotting devaition of slope for each line w.r.t to reference
-    %{
-    m_array1 = C_m(i3,:);
-    m_array = cell2mat(m_array1);
-    figure()
-    width =0.2;
-    b1=bar(m_array,width);
-    title(strcat(SpltStr{1,1:2}))
-    set(gca,'XTickLabels',lgd)
-    set(gca, 'XTick', linspace(1,length(lgd),length(lgd)), 'XTickLabels', lgd)
-    xtickangle(45)
-    %}
-    
-    % Stroing and plotting devaition of Admittance and Resistance for each data measurement w.r.t to reference (Baseline)
+    % Storing and plotting devaition of Admittance and Resistance for each data measurement w.r.t to reference (Baseline)
     for i4 = 1:n(i3)
-        A = C_Avg_Ad {i3,1};% 1 is the baseline measurement
+        A = C_Avg_Ad {i3,1};% Baseline/Reference measurement, make sure to keep the baseline measurement as the fisrt file in the test folder
         B = C_Avg_Ad {i3, i4};
         C = C_Avg_Rr {i3,1};
         D = C_Avg_Rr {i3, i4};
@@ -57,27 +45,21 @@ for i3 = 1:s1
         Ft_Rr (i4) = FrechetDiscrete(C,D); % Frechet Distance for Resistance plots
     end
     
-    C_Ft_Ad {i4} = Ft_Ad;
+    C_Ft_Ad {i3} = Ft_Ad;
     C_Ft_Rr {i3} = Ft_Rr;
     
-    % Difference between Admittance plots
-    figure()
-    width =0.4;
-    b2=bar(Ft_Ad,width);
-    title(strcat(SpltStr{1,1:2}))
-    set(gca,'XTickLabels',lgd)
-    set(gca, 'XTick', linspace(1,length(lgd),length(lgd)), 'XTickLabels', lgd)
-    xtickangle(45)
-
-%     
-    % Difference between Resistance plots
-    %{
-    figure()
-    b3=bar(Ft_Rr,width);
-    title(strcat(SpltStr{1,1:2}))
-    set(gca,'XTickLabels',lgd)
-    set(gca, 'XTick', linspace(1,length(lgd),length(lgd)), 'XTickLabels', lgd)
-    xtickangle(45)
-    %}
+    % Frechet Distance difference between Admittance plots
+    [~] = Bar_prop(Ft_Ad,'Frechet Distance Admittance data',SpltStr,lgd);
     
+    % Frechet Distance difference between Resistance plots
+    [~] = Bar_prop(Ft_Rr,'Frechet Distance Resistance data',SpltStr,lgd); 
+
+   % Stroing and plotting devaition of slopes and peaks for each line w.r.t to reference
+    m_array = C_m(i3,:);
+    pks_array = C_max_pks(i3,:);
+    Fr_pks_array = C_Fr_pks (i3,:);
+    [~] = Bar_prop(m_array,'Linear fit Slope',SpltStr,lgd);
+    [~] = Bar_prop(pks_array,'Peaks for Resistance data',SpltStr,lgd); % Find highest peak between (200-450K): Useful during bending, Fatigue & AOE tests
+    [~] = Bar_prop(Fr_pks_array,'Peaks Frequency',SpltStr,lgd); % Find frequency of highest peak
+   
 end

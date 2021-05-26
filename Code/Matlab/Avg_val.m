@@ -8,7 +8,7 @@ function [Testdata, data, Fr, Avg_Ad ,Avg_Rr] = Avg_val(filename)
 %}
 
 %% Open and read file 
-fid = fopen(filename);
+fid = fopen(filename,'r');
 data = textscan(fid, '%s %s %s %s %s %s %s %s','delimiter',',');
 fclose(fid);
 

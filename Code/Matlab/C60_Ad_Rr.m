@@ -31,7 +31,7 @@ for i=1:length (folders)
 end
 
 %% Load text files, process them, plot and store the results
-[C_Avg_Ad, C_Avg_Rr,C_strAd,C_strRr, C_m] = deal(cell(nb_folders, (max(f)-2)));
+[C_Avg_Ad, C_Avg_Rr,C_strAd,C_strRr, C_m,C_max_pks, C_Fr_pks] = deal(cell(nb_folders, (max(f)-2)));
 
 for i1 = 3:length(folders)% 3 because of '.' and '..'
    
@@ -50,12 +50,11 @@ for i1 = 3:length(folders)% 3 because of '.' and '..'
                 [Testdata, data, Fr, Avg_Ad ,Avg_Rr] = Avg_val(filename);% Function Avg_val calculates the average of Ad and Zr for each measuremmet
                 C_Avg_Ad {(i1-2),(i2-2)}=Avg_Ad;
                 C_Avg_Rr {(i1-2),(i2-2)}=Avg_Rr;
-                [R,m,c,Pev]=Leastsq_Regression(Fr,Avg_Ad);
-%                 pks = findpeaks(Avg_Ad);
+                [R,m,~,Pev]=Leastsq_Regression(Fr,Avg_Ad);
                 
                 % Normalize
 %                 Avg_Ad = (Avg_Ad-min(Avg_Ad))/(max(Avg_Ad)-min(Avg_Ad));
-%                 Avg_Zr = (Avg_Zr-min(Avg_Zr))/(max(Avg_Zr)-min(Avg_Rr));              
+%                 Avg_Rr = (Avg_Rr-min(Avg_Rr))/(max(Avg_Rr)-min(Avg_Rr));              
                 
                 % Store all data with their names in the specfic folders
                 str = strsplit(filename,filesep);
@@ -68,6 +67,12 @@ for i1 = 3:length(folders)% 3 because of '.' and '..'
                 C_strAd {(i1-2),(i2-2)}=strAd;
                 C_strRr {(i1-2),(i2-2)}=strRr;
                 C_m {(i1-2),(i2-2)}=m;
+                idx1 = Fr> (2e5) & Fr < (4.5e5); 
+                pks = findpeaks(Avg_Rr(idx1)); % Find the peaks between a specefic frequency range (200K-450K)
+                C_max_pks {(i1-2),(i2-2)}= max(pks);
+                c = ismember(Avg_Rr,max(pks));
+                idx2 = find(c);
+                C_Fr_pks {(i1-2),(i2-2)} = Fr(idx2);
                 
                 p = mfilename('fullpath');
                 p = fileparts([p,mfilename]);
@@ -85,24 +90,20 @@ for i1 = 3:length(folders)% 3 because of '.' and '..'
                 save(sprintf(strRr),'Avg_Rr')
                 cd (p);
                 
-%                 figure ((2*i1-5))                
-                figure ((i1-2))
-                subplot(2,1,1);
+                figure ((2*i1-5))                
+%                 figure ((i1-2))
+%                 subplot(2,1,1);
                 txt = (erase(filename,"_"));
-%                 Fr = smooth(Fr);
-%                 Avg_Ad=smooth(Avg_Ad);
                 loglog(Fr,Avg_Ad,'DisplayName',txt,'LineWidth',1)
                 [~] = Plot_prop(sav_folder1,Fr,'Admittance [S]');
                 
-%                 figure ((2*i1-4))
-                subplot(2,1,2);
-%                 Fr = smooth(Fr);
-%                 Avg_Rr=smooth(Avg_Rr);
+                figure ((2*i1-4))
+%                 subplot(2,1,2);
                 plot(Fr,Avg_Rr,'DisplayName',txt,'LineWidth',1)
                 [~] = Plot_prop(sav_folder2,Fr,'Resistance [Ohm]');
                 
                 % Linear fit of data to the plots, store m (Slopes) values and compare the curves based on their m(Slopes)
-                if strcmp (folder_name, 'BaseLine')==1
+                if strcmp (folder_name, 'BaseLine_Data')==1
                     figure((2*nb_folders)+1);
                     plot(Fr,Pev,'DisplayName',txt,'LineWidth',1);
                     [~] = Plot_prop(sav_folder1,Fr,'Admittance [Ohm]');
@@ -116,6 +117,6 @@ for i1 = 3:length(folders)% 3 because of '.' and '..'
    
 end
 
-%% Deviation
+%% Deviation and difference between different plots and signals 
 Deviation
 

@@ -1,4 +1,4 @@
-function [cm] = FrechetDiscrete(P,Q,dfcn)
+function [cm,cSq] = FrechetDiscrete(P,Q,dfcn)
 % Calculates the discrete Frechet distance between curves P and Q
 %
 % [cm, cSq] = DiscreteFrechetDist(P,Q)
