@@ -24,7 +24,7 @@ C_max_pks(all(cellfun('isempty',C_max_pks),2),:) = [];
 C_Fr_pks(all(cellfun('isempty',C_Fr_pks),2),:) = [];
 
 % Obtain and plot the Ft = Frechet Distance for each admittance and resitance measurement w.r.t to baseline data/reference data. 
-[C_Ft_Ad,C_Ft_Rr] = deal(cell(1, s1)); % Ft = Frechet Discrete
+[C_Ft_Ad,C_Ft_Rr] = deal(cell(1, s1)); % Ft = Frechet Descrete Distance
 
 for i3 = 1:s1
     
@@ -41,25 +41,52 @@ for i3 = 1:s1
         B = C_Avg_Ad {i3, i4};
         C = C_Avg_Rr {i3,1};
         D = C_Avg_Rr {i3, i4};
-        Ft_Ad (i4) = FrechetDiscrete(A,B); % Frechet Distance for Admittance plots
-        Ft_Rr (i4) = FrechetDiscrete(C,D); % Frechet Distance for Resistance plots
+        Ft_Ad (i4) = FrechetDist(A,B); % Frechet Distance for Admittance plots
+        Ft_Rr (i4) = FrechetDist(C,D); % Frechet Distance for Resistance plots
+        R = corrcoef(A,B);
+        cr = xcorr(A,B); % Implement cross relation and prinicipal component analysis
+        figure(1)
+        plot(cr)
+        hold on
+%         pause(2)
     end
     
     C_Ft_Ad {i3} = Ft_Ad;
     C_Ft_Rr {i3} = Ft_Rr;
     
     % Frechet Distance difference between Admittance plots
-    [~] = Bar_prop(Ft_Ad,'Frechet Distance Admittance data',SpltStr,lgd);
+    [~] = Bar_prop(Ft_Ad,SpltStr,lgd,'Frechet Distance Admittance data');
     
     % Frechet Distance difference between Resistance plots
-    [~] = Bar_prop(Ft_Rr,'Frechet Distance Resistance data',SpltStr,lgd); 
+%     [~] = Bar_prop(Ft_Rr,SpltStr,lgd,'Frechet Distance Resistance data'); 
 
    % Stroing and plotting devaition of slopes and peaks for each line w.r.t to reference
     m_array = C_m(i3,:);
     pks_array = C_max_pks(i3,:);
     Fr_pks_array = C_Fr_pks (i3,:);
-    [~] = Bar_prop(m_array,'Linear fit Slope',SpltStr,lgd);
-    [~] = Bar_prop(pks_array,'Peaks for Resistance data',SpltStr,lgd); % Find highest peak between (200-450K): Useful during bending, Fatigue & AOE tests
-    [~] = Bar_prop(Fr_pks_array,'Peaks Frequency',SpltStr,lgd); % Find frequency of highest peak
+%     [~] = Bar_prop(m_array,SpltStr,lgd,'Linear fit Slope');
+%     [~] = Bar_prop(pks_array,SpltStr,lgd,'Peaks for Resistance data'); % Find highest peak between (200-450K): Useful during bending, Fatigue & AOE tests
+%     [~] = Bar_prop(Fr_pks_array,SpltStr,lgd,'Peaks Frequency'); % Find frequency of highest peak
    
+end
+
+
+%% Function definitions
+function [array] = Bar_prop(array,SpltStr,lgd,lgdname) 
+
+%{
+- To plot bar graphs with specific properties
+%}
+if iscell(array)
+    array = cell2mat(array);
+end
+figure()
+width =0.3;
+bar(array,width);
+legend(lgdname)
+title(strcat(SpltStr{1,1:2}))
+set(gca,'XTickLabels',lgd)
+set(gca, 'XTick', linspace(1,length(lgd),length(lgd)), 'XTickLabels', lgd)
+xtickangle(45)
+
 end

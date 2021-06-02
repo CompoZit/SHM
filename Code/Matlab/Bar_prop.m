@@ -1,4 +1,4 @@
-function [array] = Bar_prop(array,lgdname,SpltStr,lgd) 
+function [array] = Bar_prop(array,SpltStr,lgd,lgdname) 
 
 %{
 - To plot bar graphs with specific properties

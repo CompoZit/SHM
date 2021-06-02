@@ -35,7 +35,7 @@ C_Rr = cell(1,k);
 
 % Loop for each repeated measurements load the values using a loop   
     for j=1:k % number of total data sets
-        Ad_new = Ad((9+(j-1)*d):(j*datapts-(j-1)*3));% Arthmearic progression 
+        Ad_new = Ad((9+(j-1)*d):(j*datapts-(j-1)*3));% Arthmetic progression a_n = a_1 +(n-1)*d
         Ad_new = str2double(Ad_new);
         C_Ad{j} =Ad_new;
         
