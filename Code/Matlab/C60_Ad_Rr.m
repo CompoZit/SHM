@@ -6,34 +6,34 @@
 - Instructions: Select the folder containing the measurements (01_TestFolder) from C60 analysis e.g., 01_TestFolder located at
   C:\Users\tsofi\OneDrive\01_ENHAnCE\07_ExperimentalData\01_Tests\02_C60_Sim_Defects,similarly for every test folder 
 - History of the code can be found at Github (Tasdeeq/SHM/Code/Matlab)
-- Function definitions have been defined inside the script, this can work in Matlab versions higher than 2016b, 
+- Function definitions have been icluded inside the script, this can work in Matlab versions higher than 2016b, 
   if you are using versions lower than 2016b please define the functions separately
 %}
 
-%% Prepare workspace and Define parameters if any
+%% Prepare workspace, Define parameters if any,Load working directory and Intialize
 clr;
 
-%% Load working directory and Intialize
 % Input the folder to work with:
 main_dir=uigetdir('C:\Users\tsofi\OneDrive\01_ENHAnCE\07_ExperimentalData'); 
 folders = dir(main_dir);
 pathstr = folders(1).folder;
 
-% Checks the number of folders to process
+% Check the number of folders and files to process
 nb_folders=0;
-f =zeros();
+nb_files =zeros();
 for i=1:length (folders)
     if (folders(i).isdir && ~strcmp(folders(i).name,'.') && ~strcmp(folders(i).name,'..'))
         folder_name = folders(i).name;
         folderpath = fullfile(pathstr,folder_name);
         files = dir(folderpath);
-        f(i) = length (files);
+        nb_files(i) = length (files);
         nb_folders=nb_folders+1;
     end
 end
 
+
 %% Load text files, process them, plot and store the results
-[C_Avg_Ad, C_Avg_Rr,C_strAd,C_strRr, C_m,C_max_pks, C_Fr_pks] = deal(cell(nb_folders, (max(f)-2)));
+[C_Avg_Ad, C_Avg_Rr,C_strAd,C_strRr, C_m,C_max_pks, C_Fr_pks] = deal(cell(nb_folders, (max(nb_files)-2)));
 
 for i1 = 3:length(folders)% Because first two entries are '.' and '..'
    
@@ -53,22 +53,24 @@ for i1 = 3:length(folders)% Because first two entries are '.' and '..'
                 C_Avg_Ad {(i1-2),(i2-2)}=Avg_Ad;
                 C_Avg_Rr {(i1-2),(i2-2)}=Avg_Rr;
                 [R,m,Pev]=Leastsq_Regression(Fr,Avg_Ad);% R = Correlation coefficient, m =slope
+                C_m {(i1-2),(i2-2)}= m; % Cell to store the slope values
                 
-                % Normalize
+                % Normalize (Change plot types Lines 104 and 109 in case of normalization)
 %                 Avg_Ad = (Avg_Ad-min(Avg_Ad))/(max(Avg_Ad)-min(Avg_Ad));
 %                 Avg_Rr = (Avg_Rr-min(Avg_Rr))/(max(Avg_Rr)-min(Avg_Rr));              
                 
-                % Store all data with their names in the specfic folders
+                % Create the name matrix in order to generate the legend for the corresponding data while plotting
                 str = strsplit(filename,filesep);
                 foldername=str{1,end-1};
                 filename = str{1,end};
                 filename=filename(1:(end-4));
+                
                 strAd = strcat(foldername,'_',filename,'_','AvgAd');
                 strRr = strcat(foldername,'_',filename,'_','AvgRr');
-                
                 C_strAd {(i1-2),(i2-2)}=strAd;
                 C_strRr {(i1-2),(i2-2)}=strRr;
-                C_m {(i1-2),(i2-2)}=m;
+                
+                % Find the peaks of the signals and the respective frequencies at which those peaks occur
                 idx1 = Fr>(2e5) & Fr<(4.5e5); 
                 pks = findpeaks(Avg_Rr(idx1)); % Find the peaks between a specefic Frequency range (200K-450K)
                 C_max_pks {(i1-2),(i2-2)}= max(pks);
@@ -76,6 +78,7 @@ for i1 = 3:length(folders)% Because first two entries are '.' and '..'
                 idx2 = find(max_pks );
                 C_Fr_pks {(i1-2),(i2-2)} = Fr(idx2);
                 
+                % Store all data with their names in the specfic folders
                 p = mfilename('fullpath');
                 p = fileparts([p,mfilename]);
                 
@@ -92,6 +95,8 @@ for i1 = 3:length(folders)% Because first two entries are '.' and '..'
                 save(sprintf(strRr),'Avg_Rr')
                 cd (p);
                 
+                %% Plot the data
+                set(0,'DefaultFigureWindowStyle','docked')% "normal" to Un-dock
                 figure ((2*i1-5))                
 %                 figure ((i1-2))
 %                 subplot(2,1,1);
@@ -124,6 +129,7 @@ end
 
 
 %% Function definitions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Function for reading data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [Testdata, data, Fr, Avg_Ad ,Avg_Rr] = Avg_val(filename)
 
 % Summary of this function goes here:
@@ -156,8 +162,7 @@ Ad = data{1,3}; % Admittance data
 Rr = data{1,5}; % Resistance data
 
 %% Read each maeasurement and find the mean values of the loops
-C_Ad = cell(1,k);
-C_Rr = cell(1,k);
+[C_Ad, C_Rr] = deal(cell(1,k));
 
 % Loop for each repeated measurements load the values using a loop   
     for j=1:k % number of total data sets
@@ -175,6 +180,26 @@ Avg_Rr = mean(cat(3,C_Rr{:}),3);
 
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Function for linear fit to data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [R,m,Pev]=Leastsq_Regression(x,y)
+
+% Linear regression function
+% Checks and fits a linear curve between two data sets
+
+p = polyfit(x,y,1);
+m = p(1); % slope of line fitted line (y = mx + c)
+% c = p(2); % constant of the fitted line (y = mx + c)
+
+% Polynomial evaluation
+Pev = polyval(p,x);
+
+% Correlation coefficients
+R=corrcoef(x,y);
+R=R(1,2);
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Function for plot properties %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [xlim1] = Plot_prop(sav_folder,Fr,Ylabel) 
 
 %{

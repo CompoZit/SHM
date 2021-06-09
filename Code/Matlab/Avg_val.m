@@ -29,9 +29,8 @@ Fr = str2double(Fr);
 Ad = data{1,3}; % Admittance data
 Rr = data{1,5}; % Resistance data
 
-%% Read each maeasurement and find the mean values of the loops
-C_Ad = cell(1,k);
-C_Rr = cell(1,k);
+%% Read each measurement and find the mean values of the loops
+[C_Ad, C_Rr] = deal(cell(1,k));
 
 % Loop for each repeated measurements load the values using a loop   
     for j=1:k % number of total data sets
